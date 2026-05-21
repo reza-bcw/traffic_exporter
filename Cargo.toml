@@ -1,0 +1,41 @@
+[package]
+name    = "traffic-exporter"
+version = "1.0.0"
+edition = "2021"
+description = "Production-grade Linux network traffic monitor & Prometheus exporter"
+
+[[bin]]
+name = "traffic-exporter"
+path = "src/main.rs"
+
+[dependencies]
+# Packet capture (requires libpcap-dev)
+pcap = "1.1"
+pnet = "0.34"
+
+# Async runtime
+tokio = { version = "1.35", features = ["full", "signal"] }
+
+# HTTP server
+warp = "0.3"
+
+# HTTP client (GeoIP lookups)
+reqwest = { version = "0.11", features = ["json"] }
+
+# Prometheus metrics
+prometheus = { version = "0.13", features = ["process"] }
+
+# Serialization
+serde      = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Structured logging (JSON lines → compatible with Loki / ELK / Datadog)
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+[profile.release]
+opt-level     = 3
+lto           = true      # link-time optimisation → smaller, faster binary
+codegen-units = 1         # single codegen unit → best optimisation
+strip         = true      # strip debug symbols → smaller binary
+panic         = "abort"   # abort on panic → no unwinding overhead in production

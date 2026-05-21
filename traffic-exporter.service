@@ -1,0 +1,42 @@
+[Unit]
+Description=Network Traffic Monitor & Prometheus Exporter
+Documentation=https://github.com/yourorg/traffic-exporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/opt/traffic_exporter/target/release/traffic-exporter
+Restart=always
+RestartSec=5s
+
+# Logging — all output goes to journald (view with: journalctl -u traffic-exporter -f)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=traffic-exporter
+
+# Environment — override defaults here
+Environment=RUST_LOG=info
+Environment=EXPORTER_PORT=9999
+
+# DDoS detection thresholds (optional — defaults shown)
+# Environment=THRESH_SYN_COUNT=500
+# Environment=THRESH_PPS=1000
+# Environment=THRESH_PORTS=100
+# Environment=THRESH_MBPS=100
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security hardening
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=false     # must be false — needs CAP_NET_RAW for pcap
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target
